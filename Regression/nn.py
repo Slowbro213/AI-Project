@@ -13,7 +13,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 import matplotlib.pyplot as plt
 
 # Load the data
-data = pd.read_csv('/content/student-por.csv', sep=';')
+data = pd.read_csv('student-por.csv', sep=';')
 
 # Preprocess the data
 # Identify categorical columns
