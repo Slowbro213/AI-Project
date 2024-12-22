@@ -27,7 +27,7 @@ y = data["G3_mat"]
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Train a decision tree regressor
-regressor = DecisionTreeRegressor(random_state=42)
+regressor = DecisionTreeRegressor(random_state=42, max_depth=3)
 regressor.fit(X_train, y_train)
 
 # Make predictions
