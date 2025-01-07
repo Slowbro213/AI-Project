@@ -1,0 +1,5 @@
+A BINARY CLASSIFICATION   
+Accuracy 0.92
+Precision 0.94
+Recall 0.98
+F1 Score 0.96

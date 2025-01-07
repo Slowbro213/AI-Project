@@ -1,0 +1,2 @@
+Root Mean Squared Error (RMSE): 2.82
+Mean Absolute Error (MAE): 2.10
