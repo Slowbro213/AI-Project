@@ -13,7 +13,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 import matplotlib.pyplot as plt
 
 # Load the data
-data = pd.read_csv('student-por.csv', sep=';')
+data = pd.read_csv('https://support.curepharm.org/student-por.csv', sep=';')
 
 # Preprocess the data
 # Identify categorical columns
@@ -48,6 +48,7 @@ print('number of features after one_hot_encoding:',X_train.shape[1])
 # Build the neural network model
 model = Sequential([
     Dense(59, input_dim=X_train.shape[1], activation='sigmoid'),
+    Dropout(0.1),
     Dense(1)  # Single output for regression
 ])
 # Compile the model
@@ -79,6 +80,7 @@ plt.xlabel('Epoch')
 plt.ylabel('Mean Absolute Error')
 plt.title('Training and Validation MAE over Epochs')
 plt.legend()
+plt.ylim(0, 5)
 plt.show()
 
 # Plot predictions vs actual values
