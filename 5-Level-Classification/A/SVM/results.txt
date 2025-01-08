@@ -1,0 +1,14 @@
+Classification Report:
+              precision    recall  f1-score   support
+
+   Excellent       0.88      0.86      0.87        44
+        Fail       0.73      0.65      0.69        17
+        Good       0.48      0.68      0.57        38
+Satisfactory       0.68      0.50      0.58        60
+  Sufficient       0.59      0.64      0.61        36
+
+    accuracy                           0.66       195
+   macro avg       0.67      0.67      0.66       195
+weighted avg       0.68      0.66      0.66       195
+
+Accuracy: 0.66
