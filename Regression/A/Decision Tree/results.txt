@@ -1,0 +1,3 @@
+RMSE: 1.23
+Mean Squared Error: 1.50
+R² Score: 0.85
