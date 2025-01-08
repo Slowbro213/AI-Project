@@ -1,0 +1,6 @@
+Classification Metrics:
+Precision (Weighted): 0.64
+Recall (Weighted): 0.65
+F1-Score (Weighted): 0.64
+Accuracy: 0.65
+Pearson Correlation Coefficient (PCC): 0.76

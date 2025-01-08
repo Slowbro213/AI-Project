@@ -1,0 +1,5 @@
+Precision: 0.94
+Recall: 0.98
+F1-Score: 0.96
+Accuracy: 0.93
+Pearson Correlation Coefficient (PCC): 0.66

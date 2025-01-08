@@ -1,0 +1,10 @@
+
+Classification Report for With G1 only:
+              precision    recall  f1-score   support
+
+        Fail       0.61      0.54      0.57       100
+        Pass       0.92      0.94      0.93       549
+
+    accuracy                           0.88       649
+   macro avg       0.76      0.74      0.75       649
+weighted avg       0.87      0.88      0.87       649
