@@ -26,7 +26,7 @@ df = pd.get_dummies(df, columns=nominal_columns, drop_first=True)
 # Step 2: Define features (G1, G2) and target (5-level grade classification)
 X = df.drop(columns=['G2','G3'])  
 
-bins = [0, 10, 14, 16, 18, 20] 
+bins = [0, 9, 11, 13, 15, 20]
 labels = ['Fail', 'Sufficient', 'Satisfactory', 'Good', 'Excellent']  
 df['G3_category'] = pd.cut(df['G3'], bins=bins, labels=labels, right=True)
 

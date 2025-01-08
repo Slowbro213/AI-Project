@@ -25,7 +25,7 @@ df = pd.get_dummies(df, columns=nominal_columns, drop_first=True)
 
 X = df.drop(columns=['G3'])  # All columns except the target column 'G3'
 
-bins = [0, 10, 14, 16, 18, 20]
+bins = [0, 9, 11, 13, 15, 20]
 labels = ['Fail', 'Sufficient', 'Satisfactory', 'Good', 'Excellent'] 
 df['G3_category'] = pd.cut(df['G3'], bins=bins, labels=labels, right=True)
 
