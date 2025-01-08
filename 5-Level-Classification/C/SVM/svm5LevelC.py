@@ -1,11 +1,13 @@
-# Import necessary libraries
+# Import necessary libraries 
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.svm import SVC  # Support Vector Classification for classification task
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.metrics import classification_report, accuracy_score, precision_score, recall_score, f1_score
 import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 
 # Load the data
 data = pd.read_csv('student-por.csv', sep=';')
@@ -15,7 +17,7 @@ bins = [0, 9, 11, 13, 15, 20]  # Define the bin edges for the 5 classes
 labels = ['Fail', 'Sufficient', 'Satisfactory', 'Good', 'Excellent']  # The corresponding labels
 data['G3_class'] = pd.cut(data['G3'], bins=bins, labels=labels, right=False)
 
-data = data.drop(columns=['G1', 'G2'])
+data = data.drop(columns=['G1','G2'])
 
 # Drop the original G3 column and create new features for classification
 target_column = 'G3_class'
@@ -63,12 +65,20 @@ y_pred = best_svm_model.predict(X_test)
 # Print the classification report and accuracy
 print("Classification Report:")
 print(classification_report(y_test, y_pred))
-print(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
+
+# Calculate metrics
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred, average='weighted')
+recall = recall_score(y_test, y_pred, average='weighted')
+f1 = f1_score(y_test, y_pred, average='weighted')
+
+# Print metrics
+print(f"Accuracy: {accuracy:.2f}")
+print(f"Precision (weighted): {precision:.2f}")
+print(f"Recall (weighted): {recall:.2f}")
+print(f"F1 Score (weighted): {f1:.2f}\n")
 
 # Plot confusion matrix (optional)
-from sklearn.metrics import confusion_matrix
-import seaborn as sns
-
 conf_matrix = confusion_matrix(y_test, y_pred, labels=labels)
 plt.figure(figsize=(8, 6))
 sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=labels, yticklabels=labels)

@@ -1,14 +1,4 @@
-Classification Report:
-              precision    recall  f1-score   support
-
-   Excellent       0.38      0.39      0.38        44
-        Fail       0.29      0.24      0.26        17
-        Good       0.23      0.32      0.27        38
-Satisfactory       0.32      0.28      0.30        60
-  Sufficient       0.42      0.36      0.39        36
-
-    accuracy                           0.32       195
-   macro avg       0.33      0.32      0.32       195
-weighted avg       0.33      0.32      0.32       195
-
 Accuracy: 0.32
+Precision (weighted): 0.33
+Recall (weighted): 0.32
+F1 Score (weighted): 0.32
