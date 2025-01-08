@@ -15,28 +15,26 @@ df = pd.read_csv("student-por.csv", sep=";")
 binary_ordinal_columns = ['sex', 'famsize', 'Pstatus', 'schoolsup', 'famsup', 'paid', 'activities',
                           'nursery', 'higher', 'internet', 'romantic']
 
-# Apply Label Encoding to binary/ordinal columns
 label_encoder = LabelEncoder()
 
 for col in binary_ordinal_columns:
     df[col] = label_encoder.fit_transform(df[col])
 
-# For nominal columns, apply One-Hot Encoding
 nominal_columns = ['school', 'address', 'Mjob', 'Fjob', 'reason', 'guardian']
 
 df = pd.get_dummies(df, columns=nominal_columns, drop_first=True)
 
 
 # Step 2: Define features (G1, G2) and target (pass_fail)
-X = df.drop(columns=['G2','G3'])  # All columns except the target column 'G3'
-y = (df['G3'] >= 10).astype(int)  # Binary target: pass (1) or fail (0)
+X = df.drop(columns=['G2','G3'])  
+y = (df['G3'] >= 10).astype(int)  
 
 # Step 3: Scale the features using Z-score normalization (StandardScaler)
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
 # Step 4: Apply PCA to reduce dimensionality
-pca = PCA(n_components=23)  # Keep 2 principal components (you can adjust this number)
+pca = PCA(n_components=23)  
 X_pca = pca.fit_transform(X_scaled)
 
 # Step 5: Split the data into training and testing sets
