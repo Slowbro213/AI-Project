@@ -28,13 +28,13 @@ data = pd.concat([data, encoded_df], axis=1)
 
 # Define five levels for G3
 def categorize_g3(grade):
-    if grade <= 4:
-        return 0  # Very Poor
-    elif grade <= 9:
-        return 1  # Poor
-    elif grade <= 14:
-        return 2  # Average
-    elif grade <= 17:
+    if grade <= 9:
+        return 0  # Fail
+    elif grade <= 11:
+        return 1  # Sufficient
+    elif grade <= 13:
+        return 2  # Satisfactory
+    elif grade <= 15:
         return 3  # Good
     else:
         return 4  # Excellent
@@ -78,7 +78,7 @@ print(f"F1 Score (weighted): {f1:.2f}\n")
 
 # Detailed classification report
 print("Classification Report:")
-print(classification_report(y_test, y_pred, target_names=["Very Poor", "Poor", "Average", "Good", "Excellent"]))
+print(classification_report(y_test, y_pred, target_names=["Fail", "Sufficient", "Satisfactory", "Good", "Excellent"]))
 
 # Confusion Matrix
 conf_matrix = confusion_matrix(y_test, y_pred)
@@ -90,8 +90,8 @@ sns.heatmap(
     annot=True,
     fmt="d",
     cmap="Blues",
-    xticklabels=["Very Poor", "Poor", "Average", "Good", "Excellent"],
-    yticklabels=["Very Poor", "Poor", "Average", "Good", "Excellent"]
+    xticklabels=["Fail", "Sufficient", "Satisfactory", "Good", "Excellent"],
+    yticklabels=["Fail", "Sufficient", "Satisfactory", "Good", "Excellent"]
 )
 plt.title("Confusion Matrix")
 plt.xlabel("Predicted Label")
