@@ -27,7 +27,7 @@ Predicting student performance is a crucial task in educational research. This p
   - Encoding categorical variables.
   - Normalizing continuous variables.
 
-- **Machine Learning Models**:
+- **Models**:
   - Logistic Regression
   - Naive Bayes
   - Decision Trees
