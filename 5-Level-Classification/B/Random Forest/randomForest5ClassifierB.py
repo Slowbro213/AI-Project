@@ -26,28 +26,28 @@ encoded_df = pd.DataFrame(encoded_features, columns=encoder.get_feature_names_ou
 data = data.drop(columns=categorical_columns).reset_index(drop=True)
 data = pd.concat([data, encoded_df], axis=1)
 
-# Remove 'G2' from features
 if 'G2' in data.columns:
     data = data.drop(columns=['G2'])
-
-# Define 5-level classification target
+    
+# Define five levels for G3
 def categorize_g3(grade):
-    if grade < 5:
-        return 0  # Very Poor
-    elif grade < 10:
-        return 1  # Poor
-    elif grade < 15:
-        return 2  # Average
-    elif grade < 18:
+    if grade <= 9:
+        return 0  # Fail
+    elif grade <= 11:
+        return 1  # Sufficient
+    elif grade <= 13:
+        return 2  # Satisfactory
+    elif grade <= 15:
         return 3  # Good
     else:
         return 4  # Excellent
 
-data['G3_Category'] = data['G3'].apply(categorize_g3)
+# Apply the categorization
+data['G3_level'] = data['G3'].apply(categorize_g3)
 
-# Define features (X) and target (y)
-X = data.drop(columns=['G3', 'G3_Category'])
-y = data['G3_Category']
+# Define features (X) and multi-class target (y)
+X = data.drop(columns=['G3', 'G3_level'])
+y = data['G3_level']
 
 # Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
@@ -75,13 +75,13 @@ f1 = f1_score(y_test, y_pred, average='weighted')
 
 # Print metrics
 print(f"Accuracy: {accuracy:.2f}")
-print(f"Precision: {precision:.2f}")
-print(f"Recall: {recall:.2f}")
-print(f"F1 Score: {f1:.2f}\n")
+print(f"Precision (weighted): {precision:.2f}")
+print(f"Recall (weighted): {recall:.2f}")
+print(f"F1 Score (weighted): {f1:.2f}\n")
 
 # Detailed classification report
 print("Classification Report:")
-print(classification_report(y_test, y_pred, target_names=["Very Poor", "Poor", "Average", "Good", "Excellent"]))
+print(classification_report(y_test, y_pred, target_names=["Fail", "Sufficient", "Satisfactory", "Good", "Excellent"]))
 
 # Confusion Matrix
 conf_matrix = confusion_matrix(y_test, y_pred)
@@ -93,10 +93,10 @@ sns.heatmap(
     annot=True,
     fmt="d",
     cmap="Blues",
-    xticklabels=["Very Poor", "Poor", "Average", "Good", "Excellent"],
-    yticklabels=["Very Poor", "Poor", "Average", "Good", "Excellent"]
+    xticklabels=["Fail", "Sufficient", "Satisfactory", "Good", "Excellent"],
+    yticklabels=["Fail", "Sufficient", "Satisfactory", "Good", "Excellent"]
 )
-plt.title("Confusion Matrix for 5-Level Classification")
+plt.title("Confusion Matrix")
 plt.xlabel("Predicted Label")
 plt.ylabel("True Label")
 plt.show()

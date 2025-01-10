@@ -1,0 +1,4 @@
+Accuracy: 0.53
+Precision (weighted): 0.53
+Recall (weighted): 0.53
+F1 Score (weighted): 0.53
