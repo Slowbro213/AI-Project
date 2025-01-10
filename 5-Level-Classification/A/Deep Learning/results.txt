@@ -1,0 +1,12 @@
+Classification Report for With G1 & G2:
+              precision    recall  f1-score   support
+
+   Very Poor       0.74      0.64      0.68       100
+        Poor       0.61      0.67      0.64       201
+     Average       0.51      0.53      0.52       154
+        Good       0.50      0.47      0.49       112
+   Excellent       0.74      0.70      0.72        82
+
+    accuracy                           0.60       649
+   macro avg       0.62      0.60      0.61       649
+weighted avg       0.60      0.60      0.60       649
