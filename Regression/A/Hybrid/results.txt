@@ -1,0 +1,3 @@
+Hybrid Model Performance:
+Root Mean Squared Error (RMSE): 1.16
+Mean Absolute Error (MAE): 0.75
