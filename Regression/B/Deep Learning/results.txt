@@ -1,1 +1,1 @@
-Root Mean Squared Error (RMSE): 0.85
+Average Fold RMSE: 1.73 (±0.35)

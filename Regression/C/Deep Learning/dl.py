@@ -1,181 +1,145 @@
 import tensorflow as tf
-from tensorflow.keras.models import Sequential, clone_model
-from tensorflow.keras.layers import Dense, Dropout, BatchNormalization
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Dense, Embedding, Flatten, concatenate, BatchNormalization, Dropout
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, StandardScaler, PowerTransformer
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import KFold
-from sklearn.preprocessing import StandardScaler, PolynomialFeatures
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from sklearn.feature_selection import SelectKBest, mutual_info_regression
-import matplotlib.pyplot as plt
-from sklearn.ensemble import VotingRegressor
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.preprocessing import PowerTransformer
 
-def load_and_preprocess_data(filepath, target_column='G3',exclude=[]):
-    # Load the data
-    data = pd.read_csv(filepath, sep=';')
+def preprocess_data(df, target_column):
+    """
+    Preprocess data by encoding categorical features and scaling numeric features.
+    """
+    # Separate features and target
+    X = df.drop(columns=[target_column])
+    y = df[target_column]
+    
+    # Identify categorical and numeric columns
+    categorical_cols = X.select_dtypes(include=['object', 'category']).columns
+    numeric_cols = X.select_dtypes(include=['int64', 'float64']).columns
 
-    data = data.drop(columns=[*exclude])
-    
-    # Create interaction features for numeric columns
-    numeric_cols = data.select_dtypes(include=['int64', 'float64']).columns
-    numeric_data = data[numeric_cols]
-    
-    # Create polynomial features for numeric columns
-    poly = PolynomialFeatures(degree=2, include_bias=False)
-    numeric_poly = poly.fit_transform(numeric_data)
-    numeric_poly_df = pd.DataFrame(
-        numeric_poly[:, len(numeric_cols):],  # Skip original features
-        columns=[f'poly_{i}' for i in range(numeric_poly.shape[1] - len(numeric_cols))]
-    )
-    
-    # Preprocess categorical columns
-    categorical_columns = data.select_dtypes(include=['object']).columns
-    
-    # OneHotEncode categorical columns with handling for rare categories
-    from sklearn.preprocessing import OneHotEncoder
-    encoder = OneHotEncoder(sparse_output=False, min_frequency=0.01)  # Remove rare categories
-    encoded_features = encoder.fit_transform(data[categorical_columns])
-    
-    # Create DataFrame for encoded features
-    encoded_df = pd.DataFrame(
-        encoded_features, 
-        columns=encoder.get_feature_names_out(categorical_columns)
-    )
-    
-    # Combine all features
-    data = pd.concat([
-        data[numeric_cols],
-        numeric_poly_df,
-        encoded_df
-    ], axis=1)
-    
-    # Define features and target
-    X = data.drop(columns=[target_column])
-    y = data[target_column]
-    
-    # Apply power transform to target variable
+    # Encode categorical features
+    encoders = {col: LabelEncoder() for col in categorical_cols}
+    for col in categorical_cols:
+        X[col] = encoders[col].fit_transform(X[col])
+
+    # Scale numeric features
+    scaler = StandardScaler()
+    X[numeric_cols] = scaler.fit_transform(X[numeric_cols])
+
+    # Transform target variable
     pt = PowerTransformer()
-    y_transformed = pt.fit_transform(y.values.reshape(-1, 1)).ravel()
-    
-    return X, y_transformed, pt
+    y = pt.fit_transform(y.values.reshape(-1, 1)).ravel()
 
-def create_deep_model(input_dim):
-    model = Sequential([
-        Dense(128, input_dim=input_dim, activation='relu'),
-        BatchNormalization(),
-        Dropout(0.3),
-        
-        Dense(64, activation='relu'),
-        BatchNormalization(),
-        Dropout(0.3),
-        
-        Dense(32, activation='relu'),
-        BatchNormalization(),
-        Dropout(0.2),
-        
-        Dense(16, activation='relu'),
-        BatchNormalization(),
-        Dropout(0.1),
-        
-        Dense(1)
-    ])
+    return X, y, encoders, scaler, pt
+
+def build_model(input_shapes, embedding_dims):
+    """
+    Build a regression deep learning model that handles categorical embeddings.
+    """
+    inputs = []
+    embeddings = []
+
+    # Create input and embedding layers for categorical features
+    for input_dim, output_dim in embedding_dims:
+        input_layer = Input(shape=(1,))
+        embedding_layer = Embedding(input_dim=input_dim, output_dim=output_dim)(input_layer)
+        flattened_layer = Flatten()(embedding_layer)
+        inputs.append(input_layer)
+        embeddings.append(flattened_layer)
+
+    # Create input for numeric features
+    numeric_input = Input(shape=(input_shapes['numeric'],))
+    inputs.append(numeric_input)
+
+    # Combine embeddings and numeric features
+    concatenated = concatenate(embeddings + [numeric_input])
+
+    # Fully connected layers
+    x = Dense(128, activation='relu')(concatenated)
+    x = BatchNormalization()(x)
+    x = Dropout(0.3)(x)
+    x = Dense(64, activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.3)(x)
+    x = Dense(32, activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.2)(x)
+    output = Dense(1, activation='linear')(x)
+
+    model = Model(inputs=inputs, outputs=output)
     return model
 
-# Load and preprocess data
-X, y_transformed, power_transformer = load_and_preprocess_data('/content/student-por.csv',exclude=['G2','G1'])
+def train_model_with_results(df, target_column):
+    """
+    Preprocess the data, train the model, and calculate RMSE on the validation set.
+    """
+    # Preprocess data
+    X, y, encoders, scaler, pt = preprocess_data(df, target_column)
 
-# Feature selection
-selector = SelectKBest(score_func=mutual_info_regression, k=25)
-X_selected = selector.fit_transform(X, y_transformed)
-selected_features = X.columns[selector.get_support()].tolist()
-
-# Initialize K-Fold cross-validation
-n_splits = 5
-kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
-
-# Lists to store predictions and actual values
-all_predictions = []
-all_actuals = []
-
-# Train models with cross-validation
-for fold, (train_idx, val_idx) in enumerate(kf.split(X_selected)):
-    print(f"\nTraining fold {fold + 1}/{n_splits}")
-    
     # Split data
-    X_train, X_val = X_selected[train_idx], X_selected[val_idx]
-    y_train, y_val = y_transformed[train_idx], y_transformed[val_idx]
-    
-    # Scale features
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_val_scaled = scaler.transform(X_val)
-    
-    # Create and train neural network
-    model = create_deep_model(X_train_scaled.shape[1])
-    model.compile(
-        optimizer=Adam(learning_rate=0.0005),
-        loss='huber',
-        metrics=['mae', 'mse']
-    )
-    
-    # Callbacks
-    callbacks = [
-        EarlyStopping(monitor='val_loss', patience=20, restore_best_weights=True),
-        ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=10, min_lr=1e-6)
-    ]
-    
-    # Train model
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Identify categorical and numeric columns
+    categorical_cols = X.select_dtypes(include=['int64']).columns[:-1]  # Assuming last column is numeric
+    numeric_cols = X.select_dtypes(include=['float64']).columns
+
+    # Prepare inputs for the model
+    embedding_dims = [(X[col].nunique(), min(50, (X[col].nunique() // 2) + 1)) for col in categorical_cols]
+    input_shapes = {'numeric': len(numeric_cols)}
+
+    # Build the model
+    model = build_model(input_shapes, embedding_dims)
+
+    # Compile the model
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+                  loss='mse',
+                  metrics=['mae', 'mse'])
+
+    # Prepare inputs for training
+    X_train_inputs = [X_train[col].values for col in categorical_cols] + [X_train[numeric_cols].values]
+    X_val_inputs = [X_val[col].values for col in categorical_cols] + [X_val[numeric_cols].values]
+
+    # Train the model
     history = model.fit(
-        X_train_scaled, y_train,
-        epochs=300,
+        X_train_inputs, y_train,
+        validation_data=(X_val_inputs, y_val),
+        epochs=100,
         batch_size=32,
-        validation_data=(X_val_scaled, y_val),
-        callbacks=callbacks,
-        verbose=0
+        callbacks=[
+            tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True),
+            tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=1e-6)
+        ],
+        verbose=1
     )
-    
-    # Get predictions
-    fold_predictions = model.predict(X_val_scaled)
-    
-    # Store predictions and actual values
-    all_predictions.extend(fold_predictions.ravel())
-    all_actuals.extend(y_val)
 
-# Inverse transform predictions and actuals
-predictions_original = power_transformer.inverse_transform(np.array(all_predictions).reshape(-1, 1)).ravel()
-actuals_original = power_transformer.inverse_transform(np.array(all_actuals).reshape(-1, 1)).ravel()
+    # Make predictions on the validation set
+    y_val_pred_transformed = model.predict(X_val_inputs).ravel()
 
-# Calculate metrics
-mse = mean_squared_error(actuals_original, predictions_original)
-rmse = np.sqrt(mse)
-mae = mean_absolute_error(actuals_original, predictions_original)
-r2 = r2_score(actuals_original, predictions_original)
+    # Inverse transform the predictions to the original scale
+    y_val_pred = pt.inverse_transform(y_val_pred_transformed.reshape(-1, 1)).ravel()
+    y_val_original = pt.inverse_transform(y_val.reshape(-1, 1)).ravel()
 
-print("\nFinal Model Performance Metrics:")
-print(f"Root Mean Squared Error (RMSE): {rmse:.2f}")
-print(f"Mean Absolute Error (MAE): {mae:.2f}")
-print(f"R² Score: {r2:.3f}")
+    # Calculate RMSE
+    rmse = np.sqrt(mean_squared_error(y_val_original, y_val_pred))
+    print(f"\nValidation RMSE: {rmse:.2f}")
 
-# Plot predictions vs actuals
-plt.figure(figsize=(10, 6))
-plt.scatter(actuals_original, predictions_original, alpha=0.5)
-plt.plot([0, 20], [0, 20], 'r--')
-plt.xlabel('Actual Grades')
-plt.ylabel('Predicted Grades')
-plt.title('Actual vs Predicted Grades')
-plt.tight_layout()
-plt.show()
+    return model, history, encoders, scaler, pt, rmse
 
-# Plot prediction error distribution
-errors = predictions_original - actuals_original
-plt.figure(figsize=(10, 6))
-plt.hist(errors, bins=30, edgecolor='black')
-plt.xlabel('Prediction Error')
-plt.ylabel('Frequency')
-plt.title('Distribution of Prediction Errors')
-plt.tight_layout()
-plt.show()
+# Example usage with a dummy dataset
+if __name__ == "__main__":
+    # Create a dummy dataset
+    df = pd.read_csv('student-por.csv', sep=';')
+
+    df = df.drop(columns=["G2","G1"])
+
+    # Train the model
+    model, history, encoders, scaler, pt, rmse = train_model_with_results(df, target_column='G3')
+
+    print("\nTraining Completed!")
+    final_val_loss = history.history['val_loss'][-1]
+    print(f"Final Validation Loss: {final_val_loss:.4f}")
+    print(f"Epochs Completed: {len(history.history['loss'])}")
+
+    # Print the RMSE
+    print(f"\nValidation RMSE: {rmse:.2f}")
