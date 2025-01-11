@@ -33,11 +33,11 @@ scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
 # Step 4: Apply PCA to reduce dimensionality
-pca = PCA(n_components=23)  
+pca = PCA(n_components=30)  
 X_pca = pca.fit_transform(X_scaled)
 
 # Step 5: Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X_pca, y, test_size=0.3, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X_pca, y, test_size=0.35, random_state=42)
 
 print(f"Training data size: {X_train.shape}, Test data size: {X_test.shape}")
 

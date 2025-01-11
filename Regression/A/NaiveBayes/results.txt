@@ -1,2 +1,2 @@
-Root Mean Squared Error (MSE): 2.49
-R-squared: 0.44
+Mean Squared Error:  2.09
+R-squared: 0.58
