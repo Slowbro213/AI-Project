@@ -32,11 +32,11 @@ scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
 # Step 4: Apply PCA to reduce dimensionality
-pca = PCA(n_components=23)  
+pca = PCA(n_components=30)  
 X_pca = pca.fit_transform(X_scaled)
 
 # Step 5: Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X_pca, y, test_size=0.3, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X_pca, y, test_size=0.35, random_state=42)
 
 print(f"Training data size: {X_train.shape}, Test data size: {X_test.shape}")
 
@@ -51,8 +51,7 @@ y_pred = gnb.predict(X_test)
 mse = mean_squared_error(y_test, y_pred)  
 r2 = r2_score(y_test, y_pred)  
 
-# Print metrics
-print(f"Mean Squared Error: {mse:.2f}")
+print(f"Root Mean Squared Error (MSE): {(mse**0.5):.2f}")
 print(f"R-squared: {r2:.2f}")
 
 # Step 9: Visualize the predicted vs actual values
