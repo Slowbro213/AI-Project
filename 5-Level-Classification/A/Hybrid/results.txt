@@ -1,0 +1,17 @@
+Decision Tree Metrics:
+Accuracy: 0.7615
+Precision: 0.6336
+Recall: 0.6476
+F1-Score: 0.6326
+
+Neural Network Metrics:
+Accuracy: 0.7077
+Precision: 0.6933
+Recall: 0.6737
+F1-Score: 0.6800
+
+Hybrid Model Metrics:
+Accuracy: 0.8077
+Precision: 0.6566
+Recall: 0.6732
+F1-Score: 0.6639
