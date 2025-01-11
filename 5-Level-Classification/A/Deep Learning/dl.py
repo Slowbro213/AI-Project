@@ -126,12 +126,6 @@ y = final_data['G3'].values
 predictions1, actuals1, accuracies1 = train_and_evaluate_scenario(X_scenario1.values, y, "with G1 and G2")
 
 # Scenario 2: With only G1
-X_scenario2 = final_data.drop(columns=['G2', 'G3'])
-predictions2, actuals2, accuracies2 = train_and_evaluate_scenario(X_scenario2.values, y, "with G1 only")
-
-# Scenario 3: Without G1 and G2
-X_scenario3 = final_data.drop(columns=['G1', 'G2', 'G3'])
-predictions3, actuals3, accuracies3 = train_and_evaluate_scenario(X_scenario3.values, y, "without G1 and G2")
 
 # Print results for all scenarios
 scenarios = ["With G1 & G2", "With G1 only", "Without G1 & G2"]
